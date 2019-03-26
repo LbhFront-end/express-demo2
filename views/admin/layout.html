@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" type="text/css" href="/public/css/admin.css">
+  <script type="text/javascript" src="/public/js/jquery-3.3.1.min.js"></script>
+  <!-- <script type="text/javascript" src="public/js/admin.js"></script> -->
+  <title>Document</title>
+</head>
+
+<body>
+
+  <div class="a-wrap">
+    <div>
+      <ul class="a-header">
+        <li class="a-item">
+          <a href="/admin">后台管理</a>
+        </li>
+        <li class="a-item">
+          <a href="/admin/user">用户管理</a>
+        </li>
+        <li class="a-item">
+          <a href="/admin/category">分类管理</a>
+        </li>
+        <li class="a-item">
+          <a href="/admin/content">内容管理</a>
+        </li>
+        <li class="a-user">
+          <span>{{userInfo.username}}</span>
+          <span><a href="/user/logout">退出</a></span>
+        </li>
+      </ul>
+    </div>
+    <div class="a-body">
+      {% block main %}{% endblock %}
+    </div>
+  </div>
+</body>
+
+</html>
