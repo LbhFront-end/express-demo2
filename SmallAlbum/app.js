@@ -11,6 +11,8 @@ app.use(bodyParser.json());
 app.set('view engine', 'ejs');
 
 app.get('/', router.showIndex)
+app.get('/upload', router.showUp)
+app.post('/upload', router.handleUpload)
 app.get('/:albumName', router.showAlbum)
 // 最后的中间件，404
 app.use((req, res) => {
