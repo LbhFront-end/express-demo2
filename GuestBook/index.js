@@ -2,14 +2,26 @@ const express = require('express');
 const db = require('./model/db.js');
 const formidable = require('formidable');
 const ObjectId = require('mongodb').ObjectID;
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
 const app = express();
 
 app.set("view engine", "ejs");
 app.use(express.static('./public'))
+app.use(cookieParser());
+app.use(session({
+  secret: 'haha',
+  resave: true,
+  saveUninitialized: true,
+  // cookie: {
+  //   secure: true
+  // }
+}))
 
 app.get("/", (req, res, next) => {
   db.getAllCount('guestbook', (err, result) => {
     if (err) throw Error(err);
+    res.cookie('Name', 'HaHa', { maxAge: 90000, httpOnly: true });
     res.render('index', {
       count: Math.ceil(result / 4)
     });
@@ -62,7 +74,37 @@ app.get('/delete', (req, res, next) => {
     res.redirect('/')
   })
 })
+app.get('/login', (req, res, next) => {
+  res.render('login')
+})
+app.post('/login', (req, res, next) => {
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields) => {
+    if (err) throw Error(err);
+    const { username, password } = fields;
+    db.find('user', { username }, {}, (err, result) => {
+      if (!result.length) {
+        return res.send('账号不存在');
+      } else {
+        if (result[0].password.toString() !== password) {
+          return res.send('密码错误');
+        } else {
+          req.session.login = true;
+          req.session.username = username;
+          res.send('登录成功');
+        }
+      }
+    });
+  });
+})
 
+app.get('/testLogin', (req, res, next) => {
+  if (req.session.login) {
+    res.send('欢迎你' + req.session.username);
+  } else {
+    res.send('请登陆');
+  }
+});
 app.listen(3000);
 
 
