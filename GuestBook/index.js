@@ -3,6 +3,7 @@ const formidable = require('formidable');
 const ObjectId = require('mongodb').ObjectID;
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const gm = require('gm');
 const db = require('./model/db.js');
 const encrypt = require('./model/encrypt.js');
 const app = express();
@@ -129,7 +130,16 @@ app.get('/testLogin', (req, res, next) => {
 });
 app.listen(3000);
 
-
+// 处理图片 https://www.npmjs.com/package/gm
+// 缩略图
+gm('./public/images/folder.jpg')
+  .resize(50, 50)
+  .write('./public/images/folder-small.jpg', (err) => {
+    if (err) throw Error(err);
+    console.log('done');
+  })
+// 裁剪图
+// .crop(w,h,x,y)
 // app.get('/', (req, res) => {
 //   db.insertOne('resturants', {
 //     name: 'haha1',
