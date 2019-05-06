@@ -23,12 +23,12 @@ exports.insertOne = (collectionName, json, callback) => {
 }
 
 exports.find = (collectionName, json = {}, args, callback) => {
-  const { pageAmount = 0, page = 0 } = args;
+  const { pageAmount = 0, page = 0, sort = {} } = args;
   const skipNumber = pageAmount * page;
   const limit = pageAmount;
   const result = [];
   connectDB((err, client) => {
-    const cursor = client.db(dbName).collection(collectionName).find(json).limit(limit).skip(skipNumber);
+    const cursor = client.db(dbName).collection(collectionName).find(json).limit(limit).skip(skipNumber).sort(sort);
     cursor.each((err, doc) => {
       if (err) {
         callback(err, null);
@@ -69,5 +69,16 @@ exports.updateMany = (collectionName, json1, json2, callback) => {
       callback(err, result);
       client.close();
     })
+  })
+}
+
+exports.getAllCount = (collectionName, callback) => {
+  connectDB((err, client) => {
+    const col = client.db(dbName).collection(collectionName);
+    col.find({}).count().then(count => {
+      console.log(count)
+      callback(err, count);
+      client.close();
+    });
   })
 }
