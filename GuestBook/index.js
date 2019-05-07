@@ -128,16 +128,35 @@ app.get('/testLogin', (req, res, next) => {
     res.send('请登陆');
   }
 });
+
+
+app.get('/cut', (req, res, next) => {
+  res.render('cut');
+});
+
+app.post('/cut', (req, res, next) => {
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields) => {
+    if (err) throw Error(err);
+    const { x, y, w, h } = fields;
+    gm('./public/images/folder.jpg')
+      .crop(w, h, x, y)
+      .write('./public/images/folder-crop.jpg', (err) => {
+        if (err) throw Error(err);
+        return res.send('成功裁剪');
+      });
+  })
+});
 app.listen(3000);
 
 // 处理图片 https://www.npmjs.com/package/gm
 // 缩略图
-gm('./public/images/folder.jpg')
-  .resize(50, 50)
-  .write('./public/images/folder-small.jpg', (err) => {
-    if (err) throw Error(err);
-    console.log('done');
-  })
+// gm('./public/images/folder.jpg')
+//   .resize(50, 50)
+//   .write('./public/images/folder-small.jpg', (err) => {
+//     if (err) throw Error(err);
+//     console.log('done');
+//   })
 // 裁剪图
 // .crop(w,h,x,y)
 // app.get('/', (req, res) => {
