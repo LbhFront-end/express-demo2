@@ -1,0 +1,75 @@
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+        aria-expanded="false" aria-controls="navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="/class">班级说说</a>
+    </div>
+
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li data-li="全部说说"><a href="/">全部说说</a></li>
+        <li data-li="我的说说"><a href="/user">我的说说</a></li>
+        <li data-li="成员列表"><a href="/users">成员列表</a></li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <% if(login){ %>
+        <li data-li="成员列表"><a href="/users">欢迎!<%=username%></a></li>
+        <li data-li="退出登录"><a href="/logout">退出登录</a></li>
+        <% }else{ %>
+        <li data-li="注册"><a href="/register">注册</a></li>
+        <li data-li="登录"><a href="/login">登录</a></li>
+        <% } %>
+      </ul>
+    </div>
+    <!--/.navbar-collapse -->
+  </div>
+</nav>
+<script src="/js/jquery.min.js"></script>
+<script>
+  function setCookie(name, value) {
+    const days = 30;
+    const exp = new Date();
+    exp.setTime(exp.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = name + "=" + decodeURI(value) + ";expires=" + exp.toGMTString();
+  }
+
+  function getCookie(name) {
+    let arr;
+    const reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+    if (arr = document.cookie.match(reg)) {
+      return decodeURIComponent(arr[2])
+    } else {
+      return null
+    }
+  }
+
+  function delCookie(name) {
+    const exp = new Date();
+    exp.setTime(exp.getTime() - 1);
+    const cval = getCookie(name);
+    if (cval !== null) {
+      document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+    }
+  }
+
+  const currentLiContent = getCookie('liContent');
+
+  const lis = $('.navbar-nav > li');
+  const target = lis.filter(`[data-li=${currentLiContent}]`);
+  if (target) {
+    target.addClass('active')
+  } else {
+    $('.navbar-nav > li:first').addClass('active');
+  }
+  lis.click(function () {
+    const content = $(this).attr('data-li')
+    setCookie('liContent', content);
+    $(this).addClass('active')
+  })
+</script>
