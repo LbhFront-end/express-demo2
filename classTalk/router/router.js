@@ -9,25 +9,16 @@ const db = require('../models/db.js');
 
 
 exports.index = (req, res, next) => {
-  const { login, username } = req.session;
-  let avatar;
-  if (login) {
-    db.find('users', { username }, {}, (err, result) => {
-      if (err) throw Error(err);
-      avatar = result[0].avatar || 'default.jpg';
-      res.render('index', {
-        login,
-        username,
-        avatar
-      });
-    })
-  } else {
+  let { login, username = '' } = req.session;
+  db.find('users', { username }, {}, (err, result) => {
+    if (err) throw Error(err);
+    const avatar = result[0] ? result[0].avatar || 'default.jpg' : 'default.jpg';
     res.render('index', {
       login,
       username,
       avatar
-    });
-  }
+    })
+  })
 }
 
 exports.register = (req, res, next) => {
@@ -160,9 +151,113 @@ exports.postCut = (req, res, next) => {
         if (err) throw Error(err);
         db.updateMany('users', { username }, { $set: { avatar } }, (err, result) => {
           if (err) throw Error(err);
-          res.redirect('/')
+          if (result.result.n == 1 && result.result.ok == 1 && result.result.nModified == 1) {
+            res.send({
+              code: 1,
+              message: '裁剪成功'
+            })
+          } else {
+            res.send({
+              code: -1,
+              message: '裁剪失败，请重试'
+            })
+          }
         })
       })
+  })
+}
+
+exports.publish = (req, res, next) => {
+  const { page } = req.query;
+  db.find('posts', {}, { pageAmount: 10, page, sort: { dateTime: -1 } }, (err, posts = []) => {
+    if (err) throw Error(err);
+    res.json({
+      code: '1',
+      posts
+    });
+  })
+}
+
+exports.postPublish = (req, res, next) => {
+  const { username } = req.session;
+  const form = new formidable.IncomingForm();
+  form.parse(req, (err, fields, files) => {
+    const { content } = fields;
+    db.insertOne('posts', {
+      username,
+      content,
+      dateTime: new Date()
+    }, (err, result) => {
+      if (err) throw Error(err);
+      if (result.result.n == 1 && result.result.ok == '1') {
+        res.send({
+          code: 1,
+          message: '发表成功'
+        });
+      } else {
+        res.send({
+          code: -1,
+          message: '发表失败'
+        });
+      }
+    })
+  });
+}
+
+
+exports.getUserInfo = (req, res, next) => {
+  const { username } = req.query;
+  db.find('users', { username }, {}, (err, result) => {
+    if (err) throw Error(err);
+    res.json({
+      code: '1',
+      ...result
+    })
+  })
+}
+
+exports.getPostsCount = (req, res, next) => {
+  db.getAllCount('posts', (err, result) => {
+    if (err) throw Error(err);
+    res.json(result);
+  });
+}
+
+exports.getAllUser = (req, res, next) => {
+  const { login, username } = req.session;
+  if (!login) {
+    res.send('请先登录');
+    return;
+  }
+  db.find('users', {}, {}, (err, result) => {
+    if (err) throw Error(err);
+    res.render('users', {
+      users: result,
+      login,
+      username
+    });
+  })
+}
+
+exports.getPostsByUser = (req, res, next) => {
+  const { login, username } = req.session;
+  if (!login) {
+    res.send('请先登录');
+    return;
+  }
+  const { user } = req.params;
+  db.find('posts', { username: user }, {}, (err, result) => {
+    if (err) throw Error(err);
+    db.find('users', { username: user }, {}, (err, result2) => {
+      if (err) throw Error(err);
+      res.render('user', {
+        posts: result,
+        login,
+        username,
+        user,
+        avatar: result2[0].avatar
+      });
+    })
   })
 }
 
@@ -170,10 +265,11 @@ exports.logout = (req, res, next) => {
   req.session.login = false;
   req.session.username = null;
   req.session.avatar = null;
-  const { username, login, avatar } = req.session;
+  const { username, login, avatar, posts } = req.session;
   res.render('index', {
     username,
     login,
-    avatar
+    avatar,
+    posts
   });
 }

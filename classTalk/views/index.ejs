@@ -29,6 +29,45 @@
             width: 100px;
             height: 100px;
         }
+
+        .alert-danger,
+        .alert-success {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .grid {
+            margin: 10px 10px;
+            height: 200px;
+            width: 250px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        #postsList {
+            margin-top: 50px;
+            height: 500px;
+        }
+
+        .myhead {
+            width: 40px;
+            height: 40px;
+            border-radius: 100%;
+            margin-right: 10px;
+        }
+
+        .grid p {
+            font-size: 12px;
+            display: flex;
+            flex-flow: row;
+            justify-content: left;
+            align-items: center;
+        }
+
+        .grid p:nth-child(1) {
+            font-size: 16px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -39,43 +78,49 @@
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron">
         <div class="container">
-            <h1>
-                <a href="/avatar"><img src="/avatar/<%=avatar%>" alt="头像" id="avatar"></a>
-                Hello, world!
-            </h1>
-            <p>This is a template for a simple marketing or informational website. It includes a large callout called a
-                jumbotron and three supporting pieces of content. Use it as a starting point to create something more
-                unique.</p>
-            <p><a class="btn btn-primary btn-lg" href="#" role="button">Learn more &raquo;</a></p>
+            <div class="row">
+                <div class="col-lg-6">
+                    <% if(login){ %>
+                    <p>
+                        <a href="/avatar"><img src="/avatar/<%=avatar%>" alt="头像" id="avatar"></a>
+                        <%= username %>
+                    </p>
+                    <div>
+                        <textarea name="content" id="content" cols="80" rows="4"></textarea>
+                    </div>
+                    <p><a class="btn btn-primary" id="publish" role="button">发表说说</a></p>
+                    <% }else{ %>
+                    <h1>欢迎！</h1>
+                    <p>班级说说是交流的园地，欢迎注册</p>
+                    <p><a class="btn btn-primary" href="/register" role="button">注册</a></p>
+                </div>
+                <div class="col-lg-6" style="margin-top:20px">
+                    <p>已有账号登录</p>
+                    <form>
+                        <div class="form-group">
+                            <label for="username">用户名</label>
+                            <input type="text" class="form-control" id="username" placeholder="用户名">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">密码</label>
+                            <input type="password" class="form-control" id="password" placeholder="密码">
+                        </div>
+                        <button type="button" class="btn btn-success" id="submit">登录</button>
+                    </form>
+                    <div class="alert alert-danger" role="alert" />
+                    <div class="alert alert-success" role="alert" />
+                </div>
+                <% } %>
+            </div>
         </div>
     </div>
 
     <div class="container">
+        <nav aria-label="...">
+            <ul class="pagination" id="pagination"></ul>
+        </nav>
         <!-- Example row of columns -->
-        <div class="row">
-            <div class="col-md-4">
-                <h2>Heading</h2>
-                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor
-                    mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna
-                    mollis euismod. Donec sed odio dui. </p>
-                <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-            </div>
-            <div class="col-md-4">
-                <h2>Heading</h2>
-                <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor
-                    mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna
-                    mollis euismod. Donec sed odio dui. </p>
-                <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-            </div>
-            <div class="col-md-4">
-                <h2>Heading</h2>
-                <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula
-                    porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh,
-                    ut fermentum massa justo sit amet risus.</p>
-                <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-            </div>
-        </div>
-
+        <div class="row" id="postsList"></div>
         <hr>
 
         <footer>
@@ -83,12 +128,169 @@
         </footer>
     </div> <!-- /container -->
 
+    <script type="text/template" id="posts">
+        <div class="col-md-4 grid">
+            <p><img src="/avatar/{{=avatar}}%>" class="myhead">{{= username}}说</p>
+            <p>{{= content}}</p>
+            <p>{{= dateTime}}</p>
+            <p><a style="font-size:12px" class="btn btn-default" href="/user/{{= username}}" role="button">查看详细 &raquo;</a></p>
+    </div>
+    </script>
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
     <script src="/js/jquery.min.js"></script>
     <script src="/js/bootstrap.js"></script>
+    <script src="/js/underscore.js"></script>
 </body>
+<script>
+    const success = $('.alert-success');
+    const danger = $('.alert-danger');
+    $('#submit').click(() => {
+        $.post('/login', {
+            username: $('#username').val(),
+            password: $('#password').val(),
+        }, (result) => {
+            if (result.code == 1) {
+                success.html(result.message)
+                success.fadeIn();
+                window.location.href = '/';
+            } else if (result.code == -1) {
+                danger.html(result.message)
+                danger.fadeIn();
+            }
+        });
+    });
+
+    $('#publish').click(() => {
+        $.post('/publish', {
+            content: $('#content').val()
+        }, (result) => {
+            if (result.code == 1) {
+                success.html(result.message)
+                success.fadeIn();
+                window.location.href = '/';
+            } else if (result.code == -1) {
+                danger.html(result.message)
+                danger.fadeIn();
+            }
+        });
+    })
+    const pagination = $('#pagination');
+    $.get('/postsCount', (count) => {
+        for (let i = 1; i <= count; i++) {
+            pagination.append(`<li class="pageButton" data-page="${i}"><a>${i}</a></li>`);
+        }
+        $('#pagination li:first').addClass('active')
+        $('#pagination li').click(function () {
+            const page = $(this).index();
+            $(this).addClass('active').siblings().removeClass('active')
+            getPosts(page)
+        });
+    })
+
+    const postsList = $('#postsList');
+    const compiled = _.template($('#posts').html());
+    // jq 嵌套请求同步
+    // $.ajax({
+    //     url: '/publish?page=0',
+    //     type: 'get',
+    //     dataType: 'json',
+    //     async: false,
+    //     success: (result) => {
+    //         if (result.code == 1) {
+    //             result.posts.forEach(v => {
+    //                 $.ajax({
+    //                     url: '/userInfo?username=' + v.username,
+    //                     type: 'get',
+    //                     dataType: 'json',
+    //                     async: false,
+    //                     success: (userInfo) => {
+    //                         if (userInfo.code == 1) {
+    //                             v.avatar = userInfo[0].avatar
+    //                             const htmlstring = compiled(v);
+    //                             postsList.append(htmlstring);
+    //                         }
+    //                     }
+    //                 })
+    //             });
+    //         }
+    //     }
+    // })
+
+    // async await 写法
+    const ajaxGet = (url) => {
+        return new Promise((resolve, reject) => {
+            let ajaxSetting = {
+                url,
+                type: 'get',
+                success: (res) => {
+                    resolve(res)
+                },
+                error: () => {
+                    resolve('请求失败')
+                }
+            }
+            $.ajax(ajaxSetting)
+        })
+    }
+
+    async function getPosts(page) {
+        postsList.html('');
+        let result = await ajaxGet('/publish?page=' + page);
+        if (result.code == 1) {
+            result.posts.forEach(async (v) => {
+                let userInfo = await ajaxGet('/userInfo?username=' + v.username);
+                if (userInfo.code == 1) {
+                    v.avatar = userInfo[0].avatar
+                    const htmlstring = compiled(v);
+                    postsList.append(htmlstring);
+                }
+            })
+        }
+    }
+
+    getPosts(0);
+    // $.get('/publish', (result) => {
+    //     if (result.code == 1) {
+    //         result.posts.forEach(v => {
+    //             $.ajax({
+    //                 url: '/userInfo?name' + v.username,
+    //                 type: 'get',
+    //                 async: false,
+    //                 success: (userInfo) => {
+    //                     if (userInfo.code == 1) {
+    //                         v.avatar = userInfo[0].avatar
+    //                         const htmlstring = compiled(v);
+    //                         postsList.append(htmlstring);
+    //                     }
+    //                 }
+    //             })
+    //         });
+    //     }
+    // })
+
+    // 原生 js 写法：
+    const getJSON = (url) => {
+        return new Promise((resolve, reject) => {
+            const handler = function () {
+                if (this.readState !== 4) {
+                    return;
+                }
+                if (this.statue === 200) {
+                    resolve(this.response)
+                } else {
+                    reject(new Errro(this.statusText))
+                }
+            }
+
+            const client = new XMLHttpRequest();
+            client.open('GET', url);
+            client.onreadystatechange = handler;
+            client.responseType = 'json';
+            client.setRequestHeader("Accept", "application/json");
+            client.send();
+        })
+    }
+
+</script>
 
 </html>

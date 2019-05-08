@@ -24,6 +24,12 @@ app.get('/avatar', router.avatar)
 app.post('/avatar', router.postAvatar)
 app.get('/cut', router.cut)
 app.post('/cut', router.postCut)
+app.get('/publish', router.publish)
+app.post('/publish', router.postPublish)
+app.get('/userInfo', router.getUserInfo)
+app.get('/postsCount', router.getPostsCount)
+app.get('/users', router.getAllUser)
+app.get('/user/:user', router.getPostsByUser)
 app.get('/logout', router.logout)
 
 app.listen(3000);

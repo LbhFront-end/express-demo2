@@ -2,6 +2,22 @@ const MongoClient = require('mongodb').MongoClient;
 
 const url = 'mongodb://localhost:27017';
 const dbName = 'Talk';
+
+
+init();
+function init(collectionName, json, args = null) {
+  if (collectionName) {
+    connectDB((err, client) => {
+      if (err) throw Error(err);
+      client.db(dbName).collection(collectionName).createIndex(json, args, (err, result) => {
+        if(err) throw Error(err);
+        console.log('建立索引成功')
+      });
+    })
+  }
+}
+
+
 const connectDB = (callback) => {
   MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
     if (err) {
