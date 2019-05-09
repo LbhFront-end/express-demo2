@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>修改图书</title>
+</head>
+
+<body>
+  <form action="/editbook" method="post" enctype="multipart/form-data">
+    <p style="display:none">id：<input type="text" name="id" value="<%=book[0]._id%>"></p>
+    <p>书名：<input type="text" name="name" value="<%=book[0].name%>"></p>
+    <p>作者：<input type="text" name="author" value="<%=book[0].author%>"></p>
+    <p>价格：<input type="text" name="price" value="<%=book[0].price%>"></p>
+    <p><input type="submit" value="提交"></p>
+  </form>
+</body>
+
+</html>
