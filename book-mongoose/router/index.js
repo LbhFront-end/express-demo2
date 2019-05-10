@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const formidable = require('formidable');
 const Book = require('../models/Book');
+const Student = require('../models/Student');
+const Class = require('../models/Class');
+
 
 router.get('/', (req, res, next) => {
   Book.getBooks((err, books) => {
@@ -24,6 +27,14 @@ router.get('/editbook', (req, res, next) => {
     res.render('editbook', {
       book
     });
+  })
+})
+
+router.get('/deletebook', (req, res, next) => {
+  const { id } = req.query;
+  Book.deleteBook(id, (err, result) => {
+    if (err) return res.json(err)
+    res.json(result)
   })
 })
 
@@ -52,4 +63,35 @@ router.post('/addbook', (req, res, next) => {
   })
 });
 
+router.get('/student', (req, res, next) => {
+  Student.updateOne({ name: "小明" }, { $set: { age: 22 } }, (err, result) => {
+    if (err) return res.json(err)
+    res.json(result)
+  })
+})
+
+router.get('/class', (req, res, next) => {
+  Class.findOne({ name: "数学" }, (err, myclass) => {
+    if (err) return res.json(err)
+    Student.findOne({ name: myclass.students[0].name }, (err, student) => {
+      student.age += 1;
+      student.save((err, newStudent) => {
+        if (err) return res.json(err)
+        myclass.students.push(newStudent)
+        myclass.save()
+      });
+    })
+  })
+})
+
 module.exports = router;
+
+function getStudent(json) {
+  Student.findOne(json, (err, result) => {
+    return new Promise((resolve, reject) => {
+      if (err) reject(err)
+      resolve(result)
+    })
+  })
+}
+

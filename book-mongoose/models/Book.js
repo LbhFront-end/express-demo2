@@ -26,4 +26,7 @@ BookSchema.statics.editBook = function (fields, callback) {
   const { id, ...restProps } = fields;
   this.model('Book').updateOne({ _id: id }, { $set: { ...restProps } }, callback);
 }
+BookSchema.statics.deleteBook = function (_id, callback) {
+  this.model('Book').remove({ _id }, callback)
+}
 module.exports = mongoose.model('Book', BookSchema)

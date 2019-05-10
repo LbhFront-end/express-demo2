@@ -30,7 +30,10 @@
       <td><%=v.name%></td>
       <td><%=v.author%></td>
       <td><%=v.price%></td>
-      <td><a href="/editbook?id=<%=v._id%>">修改</a></td>
+      <td>
+        <a href="/editbook?id=<%=v._id%>">修改</a>|
+        <a href="/deletebook?id=<%=v._id%>">删除</a>
+      </td>
     </tr>
     <%   })} %>
   </table>
