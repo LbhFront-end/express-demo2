@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>小小聊天室</title>
+  <style>
+    .operation {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3)
+    }
+
+    #content {
+      width: 100%;
+      height: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
+    }
+
+    #submit {
+      cursor: pointer;
+      border: none;
+      outline: none;
+      color: #fff;
+      background: #000;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    #submit:hover {
+      background: rgba(0, 0, 0, 0.5)
+    }
+
+    .list {
+      list-style: none;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    .list li {
+      height: 20px;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>小小聊天室</h1>
+  <p>欢迎你!<span id="username"><%=username %></span></p>
+  <div>
+    <ul class="list">
+
+    </ul>
+  </div>
+  <div class="operation">
+    <input type="text" id="content" name="content">
+    <input type="button" value="发言" id="submit">
+  </div>
+</body>
+<script src="/js/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  function sendMessage() {
+    socket.emit('chat', {
+      content: $('#content').val(),
+      username: $('#username').html()
+    });
+    $('#content').val("")
+  }
+  $('#submit').click(() => {
+    sendMessage();
+  })
+  $('#content').keydown((e) => {
+    if (e.keyCode === 13) {
+      sendMessage();
+    }
+  });
+  socket.on('chatlist', (msg) => {
+    $('.list').prepend(`<li><b>${msg.username}说：</b>${msg.content}</li>`)
+  });
+</script>
+
+</html>
